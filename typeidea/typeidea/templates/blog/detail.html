@@ -1,0 +1,12 @@
+{% if post %}
+<h1>{{ post.title }}</h1>
+<div>
+  <span>分类:{{ post.category.name }}</span>
+  <span>作者:{{ post.owner.username }}</span>
+  <span>简介:{{ post.desc }}</span>
+</div>
+<hr />
+<p>
+  {{ post.content }}
+</p>
+{% endif %}
