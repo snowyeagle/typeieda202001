@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from .models import Post, Category, Tag
+from config.models import SideBar
 
 
 # 分类与文章是1:N的关系，所以先获取tag对象，后获取category_id对象的列表，即可显示该类的所有文章
@@ -19,6 +20,7 @@ def post_list(request, category_id=None, tag_id=None):
         'category': category,
         'tag': tag,
         'post_list': post_list,
+        'sidebars': SideBar.get_all(),
     }
     context.update(Category.get_navs())
     return render(request, 'blog/list.html', context=context)
@@ -33,8 +35,9 @@ def post_detail(request, post_id=None):
 
     context = {
         'post': post,
+        'sidebars': SideBar.get_all(),
     }
-    context.update(Category.is_nav())
+    # context.update(Category.is_nav())
     return render(request, 'blog/detail.html', context={'post': post})
 
 # Create your views here.
