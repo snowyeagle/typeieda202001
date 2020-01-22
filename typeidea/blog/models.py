@@ -24,6 +24,22 @@ class Category(models.Model):
     def __str__(self):
         return "{0}:{1}".format(self.name, self.id)
 
+    @classmethod
+    def get_navs(cls):
+        categories = cls.objects.filter(status=cls.STATUS_NORMAL)
+        nav_categories = []
+        normal_categories = []
+        for cate in categories:
+            if cate.is_nav:
+                nav_categories.append(cate)
+            else:
+                normal_categories.append(cate)
+
+        return {
+            'navs': nav_categories,
+            'categories': normal_categories,
+        }
+
     class Meta:
         verbose_name = verbose_name_plural = '分类'
 
