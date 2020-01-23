@@ -1,3 +1,4 @@
+from django.views.generic import ListView, DetailView
 from django.shortcuts import render
 from .models import Post, Category, Tag
 from config.models import SideBar
@@ -39,5 +40,18 @@ def post_detail(request, post_id=None):
     }
     # context.update(Category.is_nav())
     return render(request, 'blog/detail.html', context={'post': post})
+
+
+class PostDetailView(DetailView):
+    model = Post
+    template_name = 'blog/detail.html'
+
+
+class PostListView(ListView):
+    queryset = Post.latest_posts()
+    paginate_by = 1
+    context_object_name = 'post_list'
+    template_name = 'blog/list.html'
+
 
 # Create your views here.
