@@ -1,57 +1,83 @@
 from django.views.generic import ListView, DetailView
-from django.shortcuts import render
-from .models import Post, Category, Tag
+from django.shortcuts import get_object_or_404
+
 from config.models import SideBar
+from .models import Post, Category, Tag
 
 
-# 分类与文章是1:N的关系，所以先获取tag对象，后获取category_id对象的列表，即可显示该类的所有文章
-def post_list(request, category_id=None, tag_id=None):
-    tag = None
-    category = None
+class CommonViewMixin:
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'sidebars': self.get_sidebars(),
+        })
+        context.update(self.get_navs())
+        return context
 
-    if tag_id:  # 先获取tag对象-标签
-        post_list, tag = Post.get_by_tag(tag_id)
-    elif category_id:
-        post_list, category = Post.get_by_category(category_id)
-    else:
-        post_list = Post.latest_posts()
+    def get_sidebars(self):
+        return SideBar.objects.filter(status=SideBar.STATUS_SHOW)
 
-    # 将字典context传给html页面
-    context = {
-        'category': category,
-        'tag': tag,
-        'post_list': post_list,
-        'sidebars': SideBar.get_all(),
-    }
-    context.update(Category.get_navs())
-    return render(request, 'blog/list.html', context=context)
+    def get_navs(self):
+        categories = Category.objects.filter(status=Category.STATUS_NORMAL)
+        nav_categories = []
+        normal_categories = []
+        for cate in categories:
+            if cate.is_nav:
+                nav_categories.append(cate)
+            else:
+                normal_categories.append(cate)
 
-
-# 直接获取category_id对象，显示该文章的详细信息
-def post_detail(request, post_id=None):
-    try:
-        post = Post.objects.get(id=post_id)
-    except Post.DoesNotExist:
-        post = None
-
-    context = {
-        'post': post,
-        'sidebars': SideBar.get_all(),
-    }
-    # context.update(Category.is_nav())
-    return render(request, 'blog/detail.html', context={'post': post})
+        return {
+            'navs': nav_categories,
+            'categories': normal_categories,
+        }
 
 
-class PostDetailView(DetailView):
-    model = Post
-    template_name = 'blog/detail.html'
-
-
-class PostListView(ListView):
-    queryset = Post.latest_posts()
-    paginate_by = 1
+class IndexView(CommonViewMixin, ListView):
+    queryset = Post.objects.filter(status=Post.STATUS_NORMAL)
+    paginate_by = 5
     context_object_name = 'post_list'
     template_name = 'blog/list.html'
 
+
+class CategoryView(IndexView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        category_id = self.kwargs.get('category_id')
+        category = get_object_or_404(Category, pk=category_id)
+        context.update({
+            'category': category,
+        })
+        return context
+
+    def get_queryset(self):
+        """ 重写querset，根据分类过滤 """
+        queryset = super().get_queryset()
+        category_id = self.kwargs.get('category_id')
+        return queryset.filter(category_id=category_id)
+
+
+class TagView(IndexView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tag_id = self.kwargs.get('tag_id')
+        tag = get_object_or_404(Tag, pk=tag_id)
+        context.update({
+            'tag': tag,
+        })
+        return context
+
+    def get_queryset(self):
+        """ 重写querset，根据标签过滤 """
+        queryset = super().get_queryset()
+        tag_id = self.kwargs.get('tag_id')
+        return queryset.filter(tag__id=tag_id)
+
+
+class PostDetailView(CommonViewMixin, DetailView):
+    queryset = Post.objects.filter(status=Post.STATUS_NORMAL)
+    template_name = 'blog/detail.html'
+    context_object_name = 'post'
+    pk_url_kwarg = 'post_id'
 
 # Create your views here.

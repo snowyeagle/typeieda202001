@@ -16,11 +16,16 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 
-from blog.views import post_list, post_detail, PostDetailView
+#from blog.views import post_list, post_detail, PostDetailView
+from blog.views import (
+    IndexView, CategoryView, TagView,
+    PostDetailView,
+)
 from config.views import links
 from typeidea.custom_site import custom_site
 
 # 理解为一个路径（正则字符串）对应一个函数的映射
+'''
 urlpatterns = [
     url(r'^$', post_list, name='index'),  # 若用户访问博客首页，就把请求传递到post_list函数中
     url(r'^category/(?P<category_id>\d+)/$',
@@ -31,4 +36,16 @@ urlpatterns = [
     url(r'^links/$', links, name='likes'),
     url(r'^super_admin/', admin.site.urls, name='super-admin'),  # 管理用户
     url(r'^admin/', custom_site.urls, name='admin'),  # 管理文章
+]
+'''
+urlpatterns = [
+    url(r'^$', IndexView.as_view(), name='index'),
+    url(r'^category/(?P<category_id>\d+)/$',
+        CategoryView.as_view(), name='category-list'),
+    url(r'^tag/(?P<tag_id>\d+)/$', TagView.as_view(), name='tag-list'),
+    url(r'^post/(?P<post_id>\d+).html$',
+        PostDetailView.as_view(), name='post-detail'),
+    url(r'^links/$', links, name='links'),
+    url(r'^super_admin/', admin.site.urls, name='super-admin'),
+    url(r'^admin/', custom_site.urls, name='admin'),
 ]
