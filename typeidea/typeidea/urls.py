@@ -21,7 +21,8 @@ from blog.views import (
     IndexView, CategoryView, TagView,
     PostDetailView,  SearchView, AuthorView
 )
-from config.views import links
+from comment.views import CommentView
+from config.views import links, LinkListView
 from typeidea.custom_site import custom_site
 
 # 理解为一个路径（正则字符串）对应一个函数的映射
@@ -45,9 +46,10 @@ urlpatterns = [
     url(r'^tag/(?P<tag_id>\d+)/$', TagView.as_view(), name='tag-list'),
     url(r'^post/(?P<post_id>\d+).html$',
         PostDetailView.as_view(), name='post-detail'),
-    url(r'^links/$', links, name='links'),
+    url(r'^links/$', LinkListView.as_view(), name='links'),
     url(r'^super_admin/', admin.site.urls, name='super-admin'),
     url(r'^admin/', custom_site.urls, name='admin'),
     url(r'^search/$', SearchView.as_view(), name='search'),
     url(r'^author/(?P<owner_id>\d+)/$', AuthorView.as_view(), name='author'),
+    url(r'^comment/$', CommentView.as_view(), name='comment'),
 ]
