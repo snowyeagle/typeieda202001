@@ -24,12 +24,6 @@ class CategoryAdmin(BaseOwnerAdmin):
                     'post_count', 'created_time')
     fields = ('name', 'status', 'is_nav')
 
-    '''
-    def save_model(self, request, obj, form, change):
-        obj.owner = request.user
-        return super(CategoryAdmin, self).save_model(request, obj, form, change)
-    '''
-
     def post_count(self, obj):
         return obj.post_set.count()
 
@@ -40,12 +34,6 @@ class CategoryAdmin(BaseOwnerAdmin):
 class TagAdmin(BaseOwnerAdmin):
     list_display = ('name', 'status', 'owner', 'created_time')
     fields = ('name', 'status')
-
-    '''
-    def save_model(self, request, obj, form, change):
-        obj.owner = request.user
-        return super(TagAdmin, self).save_model(request, obj, form, change)
-    '''
 
 
 # 这个案例非常重要，到后面的学习中需要着重学习
@@ -85,17 +73,6 @@ class PostAdmin(BaseOwnerAdmin):
     save_on_top = True
     exclude = ['owner', ]
 
-    '''
-    # 标准显示方式
-    fields = (
-        ('category', 'title'),
-        'desc',
-        'status',
-        'content',
-        'tag',
-    )
-    '''
-
     # 分段显示方式，更为清晰和方便
     fieldsets = (
         ('基础配置', {
@@ -118,31 +95,12 @@ class PostAdmin(BaseOwnerAdmin):
     )
     filter_horizontal = ('tag', )  # 用于控制多对多字段选择的效果
 
-    '''
-    def operator(self, obj):
-        return format_html(
-            '<a href="{}">编辑</a>',
-            reverse('admin:blog_post_change', args=(obj.id,))
-        )
-    '''
-
     def operator(self, obj):
         return format_html(
             '<a href="{}">编辑</a>',
             reverse('cus_admin:blog_post_change', args=(obj.id,))
         )
     operator.short_description = '操作'
-
-    '''
-    def save_model(self, request, obj, form, change):
-        obj.owner = request.user
-        return super(PostAdmin, self).save_model(request, obj, form, change)
-
-    # 以下函数使得用户只能看到自己创建的文章/标题
-    def get_queryset(self, request):
-        qs = super(PostAdmin, self).get_queryset(request)
-        return qs.filter(owner=request.user)
-    '''
 
     # 在列表中显示分类名信息
     def show_category_name(self, obj):

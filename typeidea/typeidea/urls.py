@@ -13,10 +13,12 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.conf.urls import url
-from django.contrib import admin
-
 #from blog.views import post_list, post_detail, PostDetailView
+
+from django.conf import settings
+from django.conf.urls import url, include
+from django.conf.urls.static import static
+from django.contrib import admin
 from blog.views import (
     IndexView, CategoryView, TagView,
     PostDetailView,  SearchView, AuthorView
@@ -24,6 +26,7 @@ from blog.views import (
 from comment.views import CommentView
 from config.views import links, LinkListView
 from typeidea.custom_site import custom_site
+from .autocomplete import CategoryAutocomplete, TagAutocomplete
 
 # 理解为一个路径（正则字符串）对应一个函数的映射
 '''
@@ -52,4 +55,8 @@ urlpatterns = [
     url(r'^search/$', SearchView.as_view(), name='search'),
     url(r'^author/(?P<owner_id>\d+)/$', AuthorView.as_view(), name='author'),
     url(r'^comment/$', CommentView.as_view(), name='comment'),
-]
+    url(r'^category-autocomplete/$', CategoryAutocomplete.as_view(),
+        name='category-autocomplete'),
+    url(r'^tag-autocomplete/$', TagAutocomplete.as_view(), name='tag-autocomplete'),
+    url(r'^ckeditor/', include('ckeditor_uploader.urls')),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
